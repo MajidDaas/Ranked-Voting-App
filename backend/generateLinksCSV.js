@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 // Config
 const FRONTEND_URL = "https://rankedvotingapp.netlify.app"; // <-- replace with your live frontend URL
 const TOKEN_FILE = "links.json"; // no data folder
-const CSV_FILE = "voting-links.csv";
+const CSV_FILE = "links.csv";
 const NUM_TOKENS = 50; // number of tokens/links to generate
 
 // Load existing tokens if the file exists
