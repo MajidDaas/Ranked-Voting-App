@@ -1,7 +1,7 @@
 const form = document.getElementById("votingForm");
 const container = document.getElementById("rankingContainer");
 const numRanks = 14;
-const API_URL = "https://ranked-voting-app-1.onrender.com/"; // replace with your backend URL
+const API_URL = "https://ranked-voting-app.onrender.com/"; // replace with your backend URL
 
 let candidates = [];
 
