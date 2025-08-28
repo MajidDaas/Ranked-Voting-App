@@ -1,0 +1,5 @@
+node_modules/
+backend/votes.json
+backend/links.json
+.DS_Store
+
