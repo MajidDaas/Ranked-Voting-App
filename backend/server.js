@@ -98,5 +98,18 @@ app.get("/api/results", (req, res) => {
   res.json({ winners: elected.slice(0,14) });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// --- NEW: Admin-only endpoint to view all voter links
+app.get("/api/links", (req, res) => {
+  if (req.query.admin !== ADMIN_PASSWORD) return res.status(403).json({ error: "Unauthorized" });
 
+  const links = fs.existsSync(linksFile) ? readJSON(linksFile) : [];
+  const fullLinks = links.map(l => ({
+    id: l.id,
+    used: l.used,
+    url: `https://rankedvotingapp.netlify.app/?link=${l.id}`
+  }));
+
+  res.json(fullLinks);
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
