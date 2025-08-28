@@ -92,3 +92,32 @@ form.addEventListener("submit", async e => {
 
 loadCandidates();
 
+const fs = require("fs");
+
+app.get("/api/results", (req, res) => {
+  const { admin } = req.query;
+  if (admin !== ADMIN_PASSWORD) return res.status(401).json({ error: "Unauthorized" });
+
+  // Load votes
+  let votes = [];
+  if (fs.existsSync("votes.json")) {
+    votes = JSON.parse(fs.readFileSync("votes.json", "utf-8"));
+  }
+
+  // Compute simple ranked-choice points
+  const points = {}; // {candidateName: totalPoints}
+  votes.forEach(ballot => {
+    ballot.forEach((candidate, index) => {
+      // Higher rank = more points
+      points[candidate] = (points[candidate] || 0) + (votes[0].length - index);
+    });
+  });
+
+  // Sort results
+  const rankedResults = Object.keys(points)
+    .map(name => ({ name, points: points[name] }))
+    .sort((a, b) => b.points - a.points);
+
+  res.json({ rawVotes: votes, rankedResults });
+});
+
