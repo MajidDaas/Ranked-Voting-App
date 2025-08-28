@@ -28,7 +28,7 @@ const allTokens = [...existingTokens, ...newTokens];
 fs.writeFileSync(TOKEN_FILE, JSON.stringify(allTokens, null, 2));
 
 // Convert tokens to full voting links
-const links = newTokens.map(token => `${FRONTEND_URL}/?token=${token.value}`);
+const links = newTokens.map(token => `${FRONTEND_URL}/?link=${token.value}`);
 
 // Write CSV in root
 fs.writeFileSync(CSV_FILE, links.join("\n"));
