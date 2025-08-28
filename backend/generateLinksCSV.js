@@ -1,29 +1,38 @@
 const fs = require("fs");
-const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 
-const linksFile = path.join(__dirname, "links.json");
-const csvFile = path.join(__dirname, "links.csv");
+// Config
+const FRONTEND_URL = "https://rankedvotingapp.netlify.app"; // <-- replace with your live frontend URL
+const TOKEN_FILE = "links.json"; // no data folder
+const CSV_FILE = "voting-links.csv";
+const NUM_TOKENS = 50; // number of tokens/links to generate
 
-// How many links to generate
-const NUM_LINKS = 50;
-
-// Generate links
-let links = [];
-for (let i = 0; i < NUM_LINKS; i++) {
-  links.push({ id: uuidv4(), used: false });
+// Load existing tokens if the file exists
+let existingTokens = [];
+if (fs.existsSync(TOKEN_FILE)) {
+  existingTokens = JSON.parse(fs.readFileSync(TOKEN_FILE, "utf-8"));
 }
 
-// Save to links.json
-fs.writeFileSync(linksFile, JSON.stringify(links, null, 2));
-console.log(`Generated ${NUM_LINKS} links in ${linksFile}`);
+// Generate new tokens
+const newTokens = [];
+for (let i = 0; i < NUM_TOKENS; i++) {
+  const token = {
+    value: uuidv4(),
+    used: false // mark as not used
+  };
+  newTokens.push(token);
+}
 
-// Export to CSV
-let csvContent = "linkID,used\n";
-links.forEach(link => {
-  csvContent += `${link.id},${link.used}\n`;
-});
+// Save all tokens back to tokens.json
+const allTokens = [...existingTokens, ...newTokens];
+fs.writeFileSync(TOKEN_FILE, JSON.stringify(allTokens, null, 2));
 
-fs.writeFileSync(csvFile, csvContent);
-console.log(`CSV file created at ${csvFile}`);
+// Convert tokens to full voting links
+const links = newTokens.map(token => `${FRONTEND_URL}/?token=${token.value}`);
 
+// Write CSV in root
+fs.writeFileSync(CSV_FILE, links.join("\n"));
+
+console.log(`✅ Generated ${NUM_TOKENS} single-use voting links!`);
+console.log(`Saved CSV at: ${CSV_FILE}`);
+console.log("Example link:", links[0]);
