@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Voting Results</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 20px auto; padding: 10px; }
+    h1 { text-align: center; }
+    label { display: block; font-weight: bold; margin: 10px 0 4px; }
+    input { width: 100%; padding: 6px; margin-bottom: 10px; }
+    button { margin: 10px auto; padding: 10px 25px; font-size: 16px; display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>Admin Voting Results</h1>
+
+  <label for="adminPassword">Enter admin password:</label>
+  <input type="password" id="adminPassword">
+  <button id="loadResults">Load Results</button>
+
+  <h2>Ranked-Choice Results</h2>
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>Candidate</th>
+        <th>Points</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button id="downloadCSV">Download Raw Votes CSV</button>
+
+  <script>
+    const loadBtn = document.getElementById("loadResults");
+    const tableBody = document.querySelector("#resultsTable tbody");
+    const downloadBtn = document.getElementById("downloadCSV");
+
+    let rawVotes = [];
+
+    loadBtn.addEventListener("click", async () => {
+      const admin = document.getElementById("adminPassword").value;
+      if (!admin) return alert("Enter admin password");
+
+      try {
+        const res = await fetch(`https://your-backend.onrender.com/api/results?admin=${admin}`);
+        if (!res.ok) throw new Error("Unauthorized or backend error");
+
+        const data = await res.json();
+        rawVotes = data.rawVotes;
+
+        // Populate table
+        tableBody.innerHTML = "";
+        data.rankedResults.forEach(r => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${r.name}</td><td>${r.points}</td>`;
+          tableBody.appendChild(row);
+        });
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!rawVotes.length) return alert("No votes loaded");
+
+      let csvContent = rawVotes.map(ballot => ballot.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "raw-votes.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
+
